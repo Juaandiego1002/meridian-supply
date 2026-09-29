@@ -1,0 +1,16 @@
+# Los scripts de shell necesitan LF: con CRLF, bash falla con
+# "/bin/bash^M: bad interpreter" al ejecutarlos dentro de Docker.
+*.sh text eol=lf
+
+# El resto de texto se normaliza en el repo para que los diffs no mezclen
+# finales de linea por el trabajo en Windows.
+* text=auto
+
+# Los binarios no deben pasar por el filtro de texto.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.ttf binary
+*.woff binary
+*.woff2 binary

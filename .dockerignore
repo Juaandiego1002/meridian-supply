@@ -1,0 +1,40 @@
+# dependencias: nunca copiar el node_modules del host (binarios de Windows
+# sobre los de Linux rompen el runtime dentro del contenedor)
+node_modules
+npm-debug.log*
+yarn-error.log*
+
+# artefactos de build locales
+.next
+out
+build
+*.tsbuildinfo
+next-env.d.ts
+
+# cache de herramientas
+.eslintcache
+.turbo
+
+# git
+.git
+.gitignore
+
+# secretos: el compose los inyecta en runtime vía environment.
+# subirlos al contexto los hornearía en las capas de la imagen.
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# instalador local de mongodb (282 MB que no aporta nada al build)
+mongodb.msi
+
+# varios
+Dockerfile
+.dockerignore
+docker-compose.yml
+DEPLOY.md
+README.md
+coverage
+.vercel
+*.md

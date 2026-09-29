@@ -1,0 +1,305 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@config '../../../tailwind.config.mjs';
+
+@custom-variant dark (&:is([data-theme='dark'] *));
+@custom-variant sm (@media (width >= theme(--breakpoint-sm)));
+@custom-variant md (@media (width >= theme(--breakpoint-md)));
+@custom-variant lg (@media (width >= theme(--breakpoint-lg)));
+@custom-variant xl (@media (width >= theme(--breakpoint-xl)));
+@custom-variant 2xl (@media (width >= theme(--breakpoint-2xl)));
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: unset;
+    font-size: unset;
+  }
+}
+
+@plugin "@tailwindcss/typography";
+
+@source inline("lg:col-span-4");
+@source inline("lg:col-span-6");
+@source inline("lg:col-span-8");
+@source inline("lg:col-span-12");
+@source inline("border-border");
+@source inline("bg-card");
+@source inline("border-error");
+@source inline("bg-error/30");
+@source inline("border-success");
+@source inline("bg-success/30");
+@source inline("border-warning");
+@source inline("bg-warning/30");
+
+/* ------------------------------------------------------------------
+   MERIDIAN SUPPLY · Sistema de diseño v1
+   Concepto: streetwear técnico de "almacén" — prendas funcionales,
+   señalética industrial, neutros cálidos con detalles naranja.
+
+   Paleta base (hex de referencia, valores reales en oklch abajo):
+   - Ink       #0E1420  azul-negro profundo → texto principal, fondos dark
+   - Bone      #F2F0EA  blanco hueso cálido → fondos claros
+   - Vermilion #E24A2A  naranja señalético  → CTAs, precios, focos
+                     (en luz se usa #C13B1C, más oscuro, para AA con blanco)
+   - Steel     #7A8494  gris acero azulado  → texto secundario, bordes
+   - Mist      #E6E9EE  gris neblina azul   → superficies, elevación
+
+   Tipografía: Geist Sans (interfaz/producto) + Geist Mono (etiquetas
+   técnicas, precios, microlabels). Sin serif: la tienda no tiene
+   pretensiones "de autor"; es una supply store con identidad urbana.
+
+   Layout: grid de producto denso, alineación a la izquierda, esquinas
+   6px y bordes 1px (sin sombras grises genéricas). Las tarjetas de
+   producto NO compiten con el precio: el precio es el único elemento
+   con tratamiento vermilion en cada card + microlabel mono por encima.
+
+   Principios:
+   1. Señalética primero: el naranja solo se usa para acción y precio
+      (comprar, pagar, oferta), nunca decorativo.
+   2. Densidad de almacén: más producto por pantalla, menos "aire de
+      showroom"; la foto es la protagonista.
+   3. Accesibilidad no negociable: contraste AA en todo texto, focus
+      visible con ring vermilion, y `prefers-reduced-motion` desactiva
+      animaciones (ver al final del archivo).
+------------------------------------------------------------------- */
+
+@theme {
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+  --breakpoint-2xl: 86rem;
+  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-geist-sans);
+}
+
+@layer utilities {
+  .container {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  @variant sm {
+    .container {
+      max-width: var(--breakpoint-sm);
+    }
+  }
+
+  @variant md {
+    .container {
+      max-width: var(--breakpoint-md);
+      padding-inline: 2rem;
+    }
+  }
+
+  @variant lg {
+    .container {
+      max-width: var(--breakpoint-lg);
+    }
+  }
+
+  @variant xl {
+    .container {
+      max-width: var(--breakpoint-xl);
+    }
+  }
+
+  @variant 2xl {
+    .container {
+      max-width: var(--breakpoint-2xl);
+    }
+  }
+}
+
+:root {
+  --background: oklch(95.4% 0.008 85); /* Bone */
+  --foreground: oklch(16.5% 0.03 262); /* Ink */
+  --card: oklch(98% 0.004 85);
+  --card-foreground: oklch(16.5% 0.03 262);
+  --popover: oklch(96.5% 0.008 85);
+  --popover-foreground: oklch(16.5% 0.03 262);
+  --primary: oklch(54.5% 0.183 38); /* Vermilion oscuro (AA sobre blanco) */
+  --primary-foreground: oklch(98.5% 0 0);
+  --secondary: oklch(92.5% 0.008 250); /* Mist */
+  --secondary-foreground: oklch(16.5% 0.03 262);
+  --muted: oklch(92.5% 0.008 250); /* Mist */
+  --muted-foreground: oklch(55% 0.02 255); /* Steel */
+  --accent: oklch(92.5% 0.008 250);
+  --accent-foreground: oklch(16.5% 0.03 262);
+  --destructive: oklch(52% 0.19 27);
+  --destructive-foreground: oklch(98.5% 0 0);
+  --border: oklch(88% 0.012 250);
+  --input: oklch(85% 0.014 250);
+  --ring: oklch(54.5% 0.183 38); /* Vermilion para focus */
+  --chart-1: oklch(54.5% 0.183 38);
+  --chart-2: oklch(60% 0.118 184.704deg);
+  --chart-3: oklch(39.8% 0.07 227.392deg);
+  --chart-4: oklch(62% 0.19 40);
+  --chart-5: oklch(76.9% 0.188 70.08deg);
+  --radius: 0.375rem;
+  --sidebar: oklch(96.5% 0.008 85);
+  --sidebar-foreground: oklch(16.5% 0.03 262);
+  --sidebar-primary: oklch(54.5% 0.183 38);
+  --sidebar-primary-foreground: oklch(98.5% 0 0);
+  --sidebar-accent: oklch(92.5% 0.008 250);
+  --sidebar-accent-foreground: oklch(16.5% 0.03 262);
+  --sidebar-border: oklch(88% 0.012 250);
+  --sidebar-ring: oklch(54.5% 0.183 38);
+  --success: oklch(78% 0.08 200deg);
+  --warning: oklch(89% 0.1 75deg);
+  --error: oklch(75% 0.15 25deg);
+}
+
+[data-theme='dark'] {
+  --background: oklch(15.5% 0.026 262); /* Ink profundo */
+  --foreground: oklch(95.4% 0.008 85); /* Bone */
+  --card: oklch(19.5% 0.028 260);
+  --card-foreground: oklch(95.4% 0.008 85);
+  --popover: oklch(17.5% 0.028 260);
+  --popover-foreground: oklch(95.4% 0.008 85);
+  --primary: oklch(62% 0.19 40); /* Vermilion vivo (fondo oscuro) */
+  --primary-foreground: oklch(15.5% 0.026 262); /* Ink sobre vermilion */
+  --secondary: oklch(22.5% 0.03 260);
+  --secondary-foreground: oklch(95.4% 0.008 85);
+  --muted: oklch(22.5% 0.03 260);
+  --muted-foreground: oklch(78% 0.01 255); /* Steel claro */
+  --accent: oklch(22.5% 0.03 260);
+  --accent-foreground: oklch(95.4% 0.008 85);
+  --destructive: oklch(58% 0.19 25);
+  --destructive-foreground: oklch(15.5% 0.026 262);
+  --border: oklch(26% 0.03 260);
+  --input: oklch(28% 0.03 260);
+  --ring: oklch(65% 0.18 40);
+  --chart-1: oklch(62% 0.19 40);
+  --chart-2: oklch(69.6% 0.17 162.48deg);
+  --chart-3: oklch(76.9% 0.188 70.08deg);
+  --chart-4: oklch(62.7% 0.265 303.9deg);
+  --chart-5: oklch(64.5% 0.246 16.439deg);
+  --sidebar: oklch(20.5% 0.028 260);
+  --sidebar-foreground: oklch(95.4% 0.008 85);
+  --sidebar-primary: oklch(62% 0.19 40);
+  --sidebar-primary-foreground: oklch(15.5% 0.026 262);
+  --sidebar-accent: oklch(23.5% 0.03 260);
+  --sidebar-accent-foreground: oklch(95.4% 0.008 85);
+  --sidebar-border: oklch(26% 0.03 260);
+  --sidebar-ring: oklch(65% 0.18 40);
+  --success: oklch(28% 0.1 200deg);
+  --warning: oklch(35% 0.08 70deg);
+  --error: oklch(45% 0.1 25deg);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground min-h-[100vh] flex flex-col;
+  }
+}
+
+html {
+  opacity: 0;
+}
+
+html[data-theme='dark'],
+html[data-theme='light'] {
+  opacity: initial;
+}
+
+/* Foco visible con el anillo vermilion de la marca (AA por defecto) */
+a,
+input,
+button {
+  @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+}
+
+/* accesibilidad: reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Animaciones de entrada */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.7s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-delay-100 { animation-delay: 100ms; }
+.animate-delay-200 { animation-delay: 200ms; }
+.animate-delay-300 { animation-delay: 300ms; }
+.animate-delay-400 { animation-delay: 400ms; }
+.animate-delay-500 { animation-delay: 500ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up {
+    animation: none;
+    opacity: 1;
+  }
+}

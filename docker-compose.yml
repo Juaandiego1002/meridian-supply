@@ -1,0 +1,114 @@
+services:
+  mongodb:
+    image: mongo:8
+    container_name: meridian-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: meridian-supply
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - meridian-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+      args:
+        NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
+        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+    container_name: meridian-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      # Mismo puerto dentro y fuera a proposito. Payload genera URLs de media
+      # absolutas con NEXT_PUBLIC_SERVER_URL, y el optimizador de imagenes de
+      # Next las descarga desde ahi: si el puerto interno fuera distinto del
+      # publicado, localhost:<publicado> no resolveria dentro del contenedor y
+      # las imagenes darian 500. Con el puerto igual en ambos lados funciona.
+      - PORT=${PORT:-3002}
+      # Docker inyecta HOSTNAME=<container-id>, y el server.js de Next hace bind
+      # a ese valor en vez de a 0.0.0.0. Sin esto escucha solo en la IP de la red
+      # de Docker y el healthcheck contra localhost falla.
+      - HOSTNAME=0.0.0.0
+      - DATABASE_URL=${DATABASE_URL}
+      - PAYLOAD_SECRET=${PAYLOAD_SECRET}
+      - NEXT_PUBLIC_SERVER_URL=${NEXT_PUBLIC_SERVER_URL}
+      - PAYLOAD_PUBLIC_SERVER_URL=${PAYLOAD_PUBLIC_SERVER_URL}
+      - PREVIEW_SECRET=${PREVIEW_SECRET}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+      - STRIPE_WEBHOOKS_SIGNING_SECRET=${STRIPE_WEBHOOKS_SIGNING_SECRET}
+      - COMPANY_NAME=${COMPANY_NAME}
+      - SITE_NAME=${SITE_NAME}
+    ports:
+      - "${PORT:-3002}:${PORT:-3002}"
+    volumes:
+      # Sin esto, las imágenes subidas desde /admin viven en el sistema de
+      # ficheros del contenedor y se pierden en cada recreado.
+      - media_data:/app/public/media
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - meridian-network
+    healthcheck:
+      # 127.0.0.1 y no localhost: en alpine localhost resuelve a ::1 y Next
+      # hace bind solo en IPv4, así que el healthcheck falla siempre.
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:${PORT:-3002}/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Seed de contenido. Solo arranca con: docker compose --profile seed run --rm seed
+  # Usa target builder porque es el único stage con node_modules, src/ y tsx.
+  # El perfil garantiza que un "up" normal no lo ejecute nunca por su cuenta.
+  seed:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    profiles:
+      - seed
+    # Sin este command el stage builder hereda "node server.js" de base y el
+    # contenedor termina sin ejecutar nada, con codigo de salida 0.
+    command: npx tsx scripts/seed.ts
+    working_dir: /app
+    # Monta el codigo para no depender de la cache de la imagen al iterar.
+    # tsx ejecuta TypeScript directo, asi que esto es el codigo real.
+    volumes:
+      - ./src:/app/src
+      - ./scripts:/app/scripts
+      # Mismo volumen que la app. Sin esto, el seed sube las imagenes a su
+      # propio sistema de ficheros, la base guarda los registros con nombre de
+      # archivo que no existe en el contenedor de la app, y las fotos dan 404.
+      - media_data:/app/public/media
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - PAYLOAD_SECRET=${PAYLOAD_SECRET}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - SEED_ADMIN_EMAIL=${SEED_ADMIN_EMAIL}
+      - SEED_ADMIN_PASSWORD=${SEED_ADMIN_PASSWORD}
+      - SEED_ADMIN_NAME=${SEED_ADMIN_NAME}
+      - SEED_CONTENT_ONLY=${SEED_CONTENT_ONLY:-true}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - meridian-network
+
+volumes:
+  mongodb_data:
+  media_data:
+
+networks:
+  meridian-network:
+    driver: bridge
